@@ -1,0 +1,32 @@
+# Menggunakan Docker Compose versi 2
+version: '2'
+
+# membuat dua buah service: item-app dan item-db.
+services:
+  # membuat service item-app
+  item-app:
+    # Menggunakan image item-app dari Github Package
+    image: ghcr.io/ndaday/item-app:v1
+    # Menerapkan restart policy pada berkas docker-compose.yml agar container selalu restart ketika terhenti.
+    restart: always
+    # port mapping agar dapat diakses dari port 80 di host.
+    ports:
+      - "80:8080"
+    # menjalankan item-app hanya berjalan setelah item-db diluncurkan.
+    depends_on:
+      - item-db
+
+  # membuat service item-db
+  item-db:
+    # Menggunakan image mongo:3
+    image: mongo:3
+    # Menerapkan restart policy pada berkas docker-compose.yml agar container selalu restart ketika terhenti.
+    restart: always
+    # Memakai volume bernama app-db dengan target /data/db di container.
+    volumes:
+      - app-db:/data/db
+
+# membuat volume      
+volumes:
+  # volume bernama app-db
+  app-db:
