@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# membuat docker image dari dockerfile dengan nama karsajobs_ui dan tag latest
+# membuat docker image dari berkas dockerfile dengan nama karsajobs_ui dan tag latest
 docker build -t ndaday/karsajobs_ui:latest .
 
 # melihat daftar image di lokal
