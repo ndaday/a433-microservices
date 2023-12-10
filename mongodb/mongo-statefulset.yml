@@ -1,0 +1,68 @@
+# Versi API yang didefinisikan
+apiVersion: apps/v1
+# jenis objek kubernetes
+kind: StatefulSet
+# metadata untuk statefulset
+metadata:
+  # nama statefulset
+  name: mongodb
+# spesifikasi statfulset
+spec:
+  #nama service yang digunakan statefulset
+  serviceName: mongo-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+      selector: mongodb
+  template:
+    metadata:
+      labels:
+        app: database
+        selector: mongodb
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongodb
+          # nama image yang digunakan
+          image: mongo:4.4.3
+          ports:
+            - containerPort: 27017
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME_FILE
+              value: /etc/mongo-credentials/MONGO_ROOT_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD_FILE
+              value: /etc/mongo-credentials/MONGO_ROOT_PASSWORD
+          # volume mount yang dieksekusi oleh aplikasi
+          volumeMounts:
+            # path untuk persistentvolume
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+            # path untuk configmap
+            - name: mongo-config
+              mountPath: /config
+            # path untuk secret
+            - name: mongo-credentials
+              mountPath: /etc/mongo-credentials
+      # volume mount yang didefinisikan pada app
+      volumes:
+        # nama persistent yang digunakan
+        - name: mongo-persistent-storage
+          persistentVolumeClaim:
+            claimName: mongo-pvc
+        # nama configmap yang digunakan
+        - name: mongo-config
+          configMap:
+            name: mongo-config
+            items:
+              - key: mongo.conf
+                path: mongo.conf
+        # nama secret yang digunakan
+        - name: mongo-credentials
+          secret:
+            secretName: mongo-credentials
+            items:
+              - key: MONGO_ROOT_USERNAME
+                path: MONGO_ROOT_USERNAME
+              - key: MONGO_ROOT_PASSWORD
+                path: MONGO_ROOT_PASSWORD
