@@ -1,0 +1,33 @@
+apiVersion: networking.istio.io/v1alpha3 # Versi API yang didefinisikan
+kind: Gateway # jenis objek kubernetes
+metadata:
+  name: ecommerce-gateway # nama objek Gateway yang akan dibuat
+spec:
+  selector: # mengidentifikasikan pod-pod yang ingin menjadi ingress gateway
+    istio: ingressgateway
+  servers:
+    - port: # menentukan jenis dan spesifikasi lalu lintas yang akan didukung oleh gateway.
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts: # Mengatur domain atau host yang diizinkan untuk mengakses server Gateway.
+        - '*'
+---
+apiVersion: networking.istio.io/v1alpha3 # Versi API yang didefinisikan
+kind: VirtualService # jenis objek kubernetes
+metadata:
+  name: order # nama virtual service
+spec:
+  hosts: # Mendefinisikan domain atau host yang diizinkan untuk mengakses VirtualService.
+    - '*'
+  gateways: # Mendefinisikan gateway yang akan menggunakan VirtualService
+    - ecommerce-gateway
+  http: #  Mendefinisikan detail tentang trafik HTTP yang akan diteruskan oleh VirtualService ini.
+    - match: # Mendefinisikan kriteria pencocokan untuk mengidentifikasi request HTTP yang akan diteruskan oleh VirtualService
+        - uri:
+            exact: /order
+      route: # Mendefinisikan destinasi yang akan menerima trafik dari VirtualService
+        - destination:
+            host: order-service # destinasi yang sesuai untuk mengarahkan trafik dari gateway tersebut ke service
+            port:
+              number: 3000

@@ -1,0 +1,41 @@
+apiVersion: v1 # Versi API yang didefinisikan
+kind: Service # jenis objek kubernetes
+metadata:
+  name: shipping-service # nama service di kubernetes
+  labels: # label yang digunakan pod untuk service
+    app: shipping
+spec:
+  type: NodePort # tipe Service
+  ports:
+    - port: 3001 # port yang diakses oleh service
+  selector:
+    app: shipping # memilih pod sesuai label
+---
+apiVersion: apps/v1 # Versi API yang didefinisikan
+kind: Deployment # jenis objek kubernetes
+metadata:
+  name: shipping # nama deployment di kubernetes
+  labels:
+    app: shipping # label yang digunakan pod untuk deployment
+    tier: consumer
+spec: # spesifikasi deployment
+  replicas: 1 # jumlah replika pod
+  selector: # selector untuk memilih pod
+    matchLabels:
+      app: shipping
+  template: # metadata untuk pod
+    metadata:
+      labels:
+        app: shipping
+        tier: consumer
+    spec: # konfigurasi container dalam pod
+      containers:
+        - name: shipping # nama container
+          image: ghcr.io/ndaday/shipping_service:latest # nama image yang digunakan
+          ports: # port yang digunakan untuk mengakses container
+            - containerPort: 3001
+          env: # environment untuk terhubung ke rabbitmq
+            - name: PORT
+              value: '3001'
+            - name: AMQP_URL
+              value: 'amqp://user:3DCNQ5XuqhAh9Bz6@rabbitmq:5672'
